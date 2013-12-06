@@ -1,6 +1,22 @@
 #!/usr/bin/python3
 
-#Usage: RapsearchToXml.py infile.aln outfile.xml
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+
+
+#Usage: RapsearchToXml.py infile.aln outfile.xml "example@mail.com"
 
 import xml.etree.cElementTree as ET
 import xml.dom.minidom
@@ -10,6 +26,11 @@ from sys import argv
 
 
 def tabParse(tabfile):
+	""" Not working perfectly yet
+	It takes the output tabular file  from rapsearch(output.m8)
+	and makes it readable for the xml write function
+	It takes into account several hits per query
+	"""
 	rawscafs=open(tabfile)
 	scafs = {}
 	for line in rawscafs:
@@ -25,9 +46,15 @@ def tabParse(tabfile):
 
 
 def alnParse(alnfile):
+	"""
+	Takes the output list file from rapsearch (outupt.aln)
+	and makes it readable for the xml write function
+	It returns a dictionary with query and hits information
+	"""
 	rawscafs=open(alnfile)
 	scafs = {}
 	for line in rawscafs:
+		#Take of the No Hit lines. They wont appear in the final output like blast
 		if line.strip().endswith("NO HIT"):
 			continue
 		elif line.strip().startswith(">"):
@@ -51,6 +78,7 @@ def alnParse(alnfile):
 	
 	
 def hsp_checker(scafs, keyvalue):
+	"""Not working yet. complementary to the tabParse Function"""
 	acessionNumbers=[]
 	for value in scafs[keyvalue]:
 		acessionNumbers.append(value[0])
@@ -60,6 +88,8 @@ def hsp_checker(scafs, keyvalue):
 		return False
 
 def get_description(mail,ID):
+	"""Used by xml write for searching the definition of the hit using the accession number from NCBI
+	which appears in the rapsearch output"""
 	Entrez.email = mail
 	handle = Entrez.efetch(db="protein", id=ID, rettype="gb", retmode="text")
 	entry=(handle.read().strip())
@@ -71,6 +101,12 @@ def get_description(mail,ID):
 
 
 def xmlwrite(scafs, outfile):
+	"""Parse the information of the rapsearch output to a xml file
+	with the same configuration of blast xml output
+	This parser uses several default fields that don't appear in rapsearch output.
+	Still not working with several hits and tabular file from rapsearch"""
+		#makes the xml tree
+		#Header of the xmlfile
 		root= ET.Element("BlastOutput")
 		BOprogram=ET.SubElement(root, "BlastOutput_program")
 		BOprogram.text= "blastx"
@@ -83,9 +119,9 @@ def xmlwrite(scafs, outfile):
 		BOqueryID=ET.SubElement(root, "BlastOutput_query-ID")
 		BOqueryID.text="Query_1"
 		BOquerydef=ET.SubElement(root, "BlastOutput_query-def")
-		BOquerydef.text="scaffold" #igual ao primeiro sera relevante?
+		BOquerydef.text="scaffold" #Default field
 		BOquerylen=ET.SubElement(root, "BlastOutput_query-len")
-		BOquerylen.text="500" #igual ao primeiro sera relevante?
+		BOquerylen.text="500" #Default field
 		BOparam=ET.SubElement(root, "BlastOutput_param")
 		PA=ET.SubElement(BOparam, "Parameters")
 		PAmatrix=ET.SubElement(PA, "Parameters_matrix")
@@ -122,11 +158,11 @@ def xmlwrite(scafs, outfile):
 				hitid.text=value[0]
 				hitdef=ET.SubElement(Hit,"Iteration_query-def")
 				acession=value[0].split("|")
-				hitdef.text=get_description(argv[3],acession[3])#aqui!!
+				hitdef.text=get_description(argv[3],acession[3])
 				hitacess=ET.SubElement(Hit, "Hit_accession")
 				hitacess.text=acession[3]
 				hitlen=ET.SubElement(Hit, "Hit_len")
-				hitlen.text="1234" #nao vem no tabular
+				hitlen.text="1234" #Default field
 				hithsp=ET.SubElement(Hit, "Hit_hsps")
 				Hsp=ET.SubElement(hithsp, "Hsp")
 				hspnum=ET.SubElement(Hsp, "Hsp_num")
@@ -134,7 +170,7 @@ def xmlwrite(scafs, outfile):
 				hspbitscore=ET.SubElement(Hsp, "Hsp_bit-score")
 				hspbitscore.text=value[1]
 				hspscore=ET.SubElement(Hsp, "Hsp_score")
-				hspscore.text="1234" #este valor nao vem no tab
+				hspscore.text="1234" #Default field
 				hspevalue=ET.SubElement(Hsp, "Hsp_evalue")
 				hspevalue.text=str(10**(round(float(value[2]))))
 				hspqstart=ET.SubElement(Hsp, "Hsp_query-from")
@@ -142,9 +178,9 @@ def xmlwrite(scafs, outfile):
 				hspqend=ET.SubElement(Hsp, "Hsp_hit-to")
 				hspqend.text=value[10]
 				hspqframe=ET.SubElement(Hsp, "Hsp_query-frame")
-				hspqframe.text=value[7]#este valor vem no tab mas pode nao estar certo
+				hspqframe.text=value[7]#Default field
 				hsphframe=ET.SubElement(Hsp, "Hsp_hit-frame")
-				hsphframe.text=value[7]#este valor vem no tab mas pode nao estar certo
+				hsphframe.text=value[7]#Default field
 				hspid=ET.SubElement(Hsp, "Hsp_identity")
 				ident=round(int(value[3])*0.01*int(value[4]))
 				hspid.text= str(ident)
@@ -164,26 +200,28 @@ def xmlwrite(scafs, outfile):
 			ITstat=ET.SubElement(IT, "Iteration_stat")
 			Stat=ET.SubElement(ITstat, "Statistics")
 			Statdbn=ET.SubElement(Stat, "Statistics_db-num")
-			Statdbn.text="34201960"#nao existe copiado de outro blast
+			Statdbn.text="34201960"#Default field
 			Statdbl=ET.SubElement(Stat, "Statistics_db-len")
-			Statdbl.text="12001222213"#nao existe copiado de outro blast
+			Statdbl.text="12001222213"#Default field
 			Stathsplen=ET.SubElement(Stat, "Statistics_hsp-len")
-			Stathsplen.text="127"#nao existe copiado de outro blast
+			Stathsplen.text="127"#Default field
 			Statefspace=ET.SubElement(Stat, "Statistics_eff-space")
-			Statefspace.text="299643336524"#nao existe copiado de outro blast
+			Statefspace.text="299643336524"#Default field
 			Statkappa=ET.SubElement(Stat, "Statistics_kappa")
-			Statkappa.text="0.041"#nao existe copiado de outro blast
+			Statkappa.text="0.041"#Default field
 			Statlambda=ET.SubElement(Stat, "Statistics_lambda")
-			Statlambda.text="0.267"#nao existe copiado de outro blast
+			Statlambda.text="0.267"#Default field
 			Statent=ET.SubElement(Stat, "Statistics_entropy")
-			Statent.text="0.14"#nao existe copiado de outro blast
-			
+			Statent.text="0.14"#Default field
+		#Write the tree to file	
 		tree= ET.ElementTree(root)
 		tree = ET.tostring(root, encoding="utf-8", method="xml")
 		tree = tree.decode("utf-8")
 		o = open(outfile,'w')
 		salsa = xml.dom.minidom.parseString(tree)
+		#Add header
 		o.write("<?xml version=\"1.0\"?>\n<!DOCTYPE BlastOutput PUBLIC \"-//NCBI//NCBI BlastOutput/EN\" \"NCBI_BlastOutput.dtd\">")
+		#Makes pretty identation on the xml text file
 		o.write(salsa.toprettyxml(indent="  ")[22:])
 		o.close()
 
