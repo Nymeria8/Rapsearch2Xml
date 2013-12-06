@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
-#Usage: cenas.py infile.aln outfile.xml
+#Usage: RapsearchToXml.py infile.aln outfile.xml
 
 import xml.etree.cElementTree as ET
 import xml.dom.minidom
 import re
+import Entrez
 from sys import argv
 
 
@@ -58,6 +59,16 @@ def hsp_checker(scafs, keyvalue):
 	else:
 		return False
 
+def get_description(mail,ID):
+	Entrez.email = mail
+	handle = Entrez.efetch(db="protein", id=ID, rettype="gb", retmode="text")
+	entry=(handle.read().strip())
+	complete=entry.split("\n")
+	definition=complete[1][12:]
+	handle.close()
+	return (definition)
+	
+
 
 def xmlwrite(scafs, outfile):
 		root= ET.Element("BlastOutput")
@@ -110,9 +121,9 @@ def xmlwrite(scafs, outfile):
 				hitid=ET.SubElement(Hit, "Hit_id")
 				hitid.text=value[0]
 				hitdef=ET.SubElement(Hit,"Iteration_query-def")
-				hitdef.text="no definition" #nao vem no tabular
-				hitacess=ET.SubElement(Hit, "Hit_accession")
 				acession=value[0].split("|")
+				hitdef.text=get_description(argv[3],acession[3])#aqui!!
+				hitacess=ET.SubElement(Hit, "Hit_accession")
 				hitacess.text=acession[3]
 				hitlen=ET.SubElement(Hit, "Hit_len")
 				hitlen.text="1234" #nao vem no tabular
@@ -171,7 +182,7 @@ def xmlwrite(scafs, outfile):
 		tree = ET.tostring(root, encoding="utf-8", method="xml")
 		tree = tree.decode("utf-8")
 		o = open(outfile,'w')
-		salsa = xml.dom.minidom.parseString(tree) # or xml.dom.minidom.parseString(xml_string)
+		salsa = xml.dom.minidom.parseString(tree)
 		o.write("<?xml version=\"1.0\"?>\n<!DOCTYPE BlastOutput PUBLIC \"-//NCBI//NCBI BlastOutput/EN\" \"NCBI_BlastOutput.dtd\">")
 		o.write(salsa.toprettyxml(indent="  ")[22:])
 		o.close()
