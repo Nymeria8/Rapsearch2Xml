@@ -1,11 +1,11 @@
 # Rapsearch To Xml
 
-___________________________________
+
 
 This program takes the Rapseach output and transforms it in a xml file similar to blast xml format.
 This is useful when we want to submit a Rapsearch output file to Blast2Go to perform the annotation step.
 
-____________________________________
+
 
 ##Usage:
 
@@ -20,19 +20,19 @@ Notes:
 + This fields will not interfere with the final result of the Blast2Go annotation.
 + The program uses the Entrez module from [biopython](https://github.com/biopython/biopython) adapted to [NCBI_Mass_Downloader](https://github.com/StuntsPT/NCBI_Mass_Downloader). A big Kudos to the authors;
 
-________________________________________
+
 
 ##Dependencies:
 
 + Python3
 
-________________________________________
+
 
 ##License:
 
 GPLv2
 
-___________________________________
+
 
 ##Known limitations:
 
@@ -41,7 +41,7 @@ For now:
 + It only accepts the rapsearchoutput.aln file
 + It only accepts one hit per query.
 
-___________________________________
+
 
 ##Found a bug?
 
