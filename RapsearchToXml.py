@@ -162,7 +162,7 @@ def xmlwrite(scafs, outfile):
 			hitdef.text=get_description(argv[3],acession[3])
 			hitacess=ET.SubElement(Hit, "Hit_accession")
 			hitacess.text=acession[3]
-			hitlen=ET.SubElement(Hit, "Hit_len")#
+			hitlen=ET.SubElement(Hit, "Hit_len")
 			hitlen.text=value[4] #Changed
 			hithsp=ET.SubElement(Hit, "Hit_hsps")
 			Hsp=ET.SubElement(hithsp, "Hsp")
