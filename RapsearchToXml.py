@@ -72,6 +72,7 @@ def alnParse(alnfile):
 				scafs[idline[0]] += [idline[1:]]
 			else:
 				scafs[idline[0]] = [idline[1:]]
+	print(scafs)
 	rawscafs.close()
 	return (scafs)
 	
@@ -104,7 +105,7 @@ def xmlwrite(scafs, outfile):
 	"""Parse the information of the rapsearch output to a xml file
 	with the same configuration of blast xml output
 	This parser uses several default fields that don't appear in rapsearch output.
-	Still not working with several hits and tabular file from rapsearch"""
+	Still not working with tabular file from rapsearch"""
 	#makes the xml tree
 	#Header of the xmlfile
 	root= ET.Element("BlastOutput")
@@ -156,13 +157,13 @@ def xmlwrite(scafs, outfile):
 			hitnum.text=str(y)
 			hitid=ET.SubElement(Hit, "Hit_id")
 			hitid.text=value[0]
-			hitdef=ET.SubElement(Hit,"Iteration_query-def")
+			hitdef=ET.SubElement(Hit, "Hit-def") 
 			acession=value[0].split("|")
 			hitdef.text=get_description(argv[3],acession[3])
 			hitacess=ET.SubElement(Hit, "Hit_accession")
 			hitacess.text=acession[3]
 			hitlen=ET.SubElement(Hit, "Hit_len")
-			hitlen.text="1234" #Default field
+			hitlen.text=value[4] #Changed
 			hithsp=ET.SubElement(Hit, "Hit_hsps")
 			Hsp=ET.SubElement(hithsp, "Hsp")
 			hspnum=ET.SubElement(Hsp, "Hsp_num")
@@ -175,8 +176,12 @@ def xmlwrite(scafs, outfile):
 			hspevalue.text=str(10**(round(float(value[2]))))
 			hspqstart=ET.SubElement(Hsp, "Hsp_query-from")
 			hspqstart.text=value[8]
-			hspqend=ET.SubElement(Hsp, "Hsp_hit-to")
+			hspqend=ET.SubElement(Hsp, "Hsp_query-to")
 			hspqend.text=value[10]
+			hsphfrom=ET.SubElement(Hsp, "Hsp_hit-from")
+			hsphfrom.text=value[12]
+			hsphend=ET.SubElement(Hsp, "Hsp_hit-to")
+			hsphend.text=value[14]
 			hspqframe=ET.SubElement(Hsp, "Hsp_query-frame")
 			hspqframe.text=value[7]#Default field
 			hsphframe=ET.SubElement(Hsp, "Hsp_hit-frame")
