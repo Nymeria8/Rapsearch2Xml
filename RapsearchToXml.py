@@ -146,7 +146,7 @@ def xmlwrite(scafs, outfile):
 		ITquerydef=ET.SubElement(IT, "Iteration_query-def")
 		ITquerydef.text=key
 		ITquerylen=ET.SubElement(IT, "Iteration_query-len")
-		size=key.split("e")
+		size=key.split("e") #correct - because of the name t doesnt split correctly
 		ITquerylen.text=size[1]
 		IThits=ET.SubElement(IT, "Iteration_hits")
 		x+=1
