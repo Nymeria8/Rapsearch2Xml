@@ -18,7 +18,7 @@ In the command line:
 </code></pre>
 
 
-<span style="text-decoration: underline;">The description field is not working after run the blast2go4pipe.I am still figuring it out, but for now, i developed a work around:</span>
+<u>The description field is not working after run the blast2go4pipe.I am still figuring it out, but for now, i developed a work around:<\u>
 
  
 ___To get the correct definition on the final annotation file:___
