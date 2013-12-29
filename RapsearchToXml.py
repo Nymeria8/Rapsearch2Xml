@@ -72,7 +72,6 @@ def alnParse(alnfile):
 				scafs[idline[0]] += [idline[1:]]
 			else:
 				scafs[idline[0]] = [idline[1:]]
-	print(scafs)
 	rawscafs.close()
 	return (scafs)
 	
@@ -96,8 +95,9 @@ def get_description(mail,ID):
 	entry=(handle.read().strip())
 	complete=entry.split("\n")
 	definition=complete[1][12:]
+	definition2=definition.strip(".")
 	handle.close()
-	return (definition)
+	return (definition2)
 	
 
 
@@ -146,7 +146,7 @@ def xmlwrite(scafs, outfile):
 		ITquerydef=ET.SubElement(IT, "Iteration_query-def")
 		ITquerydef.text=key
 		ITquerylen=ET.SubElement(IT, "Iteration_query-len")
-		size=key.split("e") #correct - because of the name t doesnt split correctly
+		size=key.split("e") #to correct - because of the name doesnt split correctly (for query names = scaffold123|size123)
 		ITquerylen.text=size[1]
 		IThits=ET.SubElement(IT, "Iteration_hits")
 		x+=1
@@ -161,9 +161,9 @@ def xmlwrite(scafs, outfile):
 			acession=value[0].split("|")
 			hitdef.text=get_description(argv[3],acession[3])
 			hitacess=ET.SubElement(Hit, "Hit_accession")
-			hitacess.text=acession[3]
+			hitacess.text=acession[3].strip(".1")
 			hitlen=ET.SubElement(Hit, "Hit_len")
-			hitlen.text=value[4] #Changed
+			hitlen.text=value[4]
 			hithsp=ET.SubElement(Hit, "Hit_hsps")
 			Hsp=ET.SubElement(hithsp, "Hsp")
 			hspnum=ET.SubElement(Hsp, "Hsp_num")
