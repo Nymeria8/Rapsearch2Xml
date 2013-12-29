@@ -59,7 +59,7 @@ GPLv2
 For now:
 + It only accepts the rapsearchoutput.aln file
 + Only works in the Blast2Go edition for comand line Blast2Go4pipe (still figuring it out)
-+ Only works with a sequence name as "name|size1234"", where 1234 is used for the size of the sequence
++ Only works with a sequence name as "name|size1234", where 1234 is used for the size of the sequence
 
 
 
